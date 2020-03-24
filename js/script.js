@@ -1,5 +1,4 @@
 window.addEventListener('DOMContentLoaded', function() {
-
     'use strict';
     let tab = document.querySelectorAll('.info-header-tab'),
         info = document.querySelector('.info-header'),
@@ -108,13 +107,49 @@ window.addEventListener('DOMContentLoaded', function() {
         this.classList.add('more-splash');
         document.body.style.overflow = 'hidden';
     });
+
+    let message = {
+        loading: 'Загрузка ...',
+        success: 'Спасибо, скоро мы с вами свяжемся!',
+        failure: 'Что-то пошло не так...'
+    };
+ 
+    let form = document.querySelector('.main-form'),
+        statusMessage = document.createElement('div'),
+        contactForm = document.querySelector('#form');        
+ 
+        statusMessage.classList.add('status');
+ 
+    form.addEventListener('submit', sendRequest);
+    contactForm.addEventListener('submit', sendRequest);
+ 
+    function sendRequest(e) {
+        e.preventDefault();
+        this.appendChild(statusMessage);
+        let request = new XMLHttpRequest();
+        request.open('POST', 'server.php');
+        request.setRequestHeader('Content-Type', 'application/json; charset=utf-8');
+ 
+        let formData = new FormData(this),
+            input = this.getElementsByTagName('input'),
+            obj = {};
+ 
+        formData.forEach(function (value, key) {
+            obj[key] = value;
+        });
+ 
+        let json = JSON.stringify(obj);
+ 
+        request.send(json);
+ 
+        request.addEventListener('readystatechange', () => {
+            if (request.readyState < 4) {
+                statusMessage.innerHTML = message.loading;
+            } else if (request.readyState == 4 && request.status == 200) {
+                statusMessage.innerHTML = message.success;
+            } else statusMessage.innerHTML = message.failure;
+            for (let i = 0; i < input.length; i++)
+                input[i].value = '';
+        });
+    }
 });
-
-// <input id="age" value="30">
-
-// let age = document.getElementById('age');
-// function showUser(surname, name) {
-
-// 	alert("Пользователь " + surname + " " + name + ", его возраст " + this.value);
-// }
-// showUser.apply(age, ['Петров', 'Иван']);
